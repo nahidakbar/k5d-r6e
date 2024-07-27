@@ -1,0 +1,58 @@
+@startuml
+
+!theme plain
+
+skinparam WrapWidth 150
+skinparam MaxMessageSize 100
+skinparam SequenceBoxBorderColor transparent
+
+actor "Customer" as customer
+
+box "Sales Channels" #LightBlue
+    participant "Online\nStorefront" as salesOnline
+    participant "Amazon\nMarketplate" as salesAmazon
+    participant "Ebay\nMarketplace" as salesEbay
+end box
+
+box "Middleware" #LightGreen
+    participant "Order\nAcquisition" as orderAcquisition
+    database "SFTP\nServer" as sftpServer
+    participant "Order\nFulfillment" as orderFulfillment
+    participant "Inventory\nUpdate" as inventoryUpdate
+end box
+
+box "Warehouse\nManagement\nSystem" #LightYellow
+    participant "WMS" as wms
+end box
+
+actor "Staff" as staff
+
+customer -> salesAmazon: Places an order
+
+orderAcquisition -> salesAmazon: Pulls new orders
+salesAmazon --> orderAcquisition: New Orders
+
+orderAcquisition -> sftpServer: (A) Exports new orders in csv format (every 15 minutes)
+
+orderFulfillment -> sftpServer: (B) Pulls new orders
+sftpServer --> orderFulfillment: New Orders
+
+orderFulfillment -> wms: (C) Creates new order
+
+wms -> staff: New Orders
+
+staff -> wms: Fulfills Orders
+
+wms -> orderFulfillment: (F) Updates order status
+
+orderFulfillment -> salesAmazon: (G) Updates order status
+
+salesAmazon -> customer: Sends order status
+
+wms -> inventoryUpdate: (D) Updates inventory (every 15 minutes)
+
+inventoryUpdate -> salesOnline: (E) Stock levels updated
+inventoryUpdate -> salesAmazon: (E) Stock levels updated
+inventoryUpdate -> salesEbay: (E) Stock levels updated
+
+@enduml

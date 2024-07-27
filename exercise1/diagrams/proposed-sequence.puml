@@ -1,0 +1,67 @@
+@startuml
+
+!theme plain
+
+!pragma teoz true
+
+skinparam WrapWidth 150
+skinparam MaxMessageSize 100
+skinparam SequenceBoxBorderColor transparent
+
+actor "Customer" as customer
+
+box "Sales Channels" #LightBlue
+    participant "Online\nStorefront" as salesOnline
+    participant "Amazon\nMarketplate" as salesAmazon
+    participant "Ebay\nMarketplace" as salesEbay
+end box
+
+box "Middleware" #LightGreen
+    participant "x\nGateway" as salesGateway
+    participant "Stock\nReservaton" as stockReservation
+    database "Inventory\nState" as inventoryState
+    participant "Stock\nAdjustment" as stockAdjustment
+end box
+
+box "Integration Queues" #LightSalmon
+    queue "Incoming\nOrders" as incomingOrders
+    queue "Inventory\nUpdate" as inventoryUpdate
+    queue "Order\nUpdate" as orderUpdate
+end box
+
+box "Warehouse\nManagement\nSystem" #LightYellow
+    participant "WMS" as wms
+end box
+
+actor "Staff" as staff
+
+customer -> salesAmazon: Places an order
+
+salesAmazon -> salesGateway: New Orders through push API
+
+salesGateway -> incomingOrders: New Order
+
+incomingOrders -> stockReservation: New Order
+& incomingOrders -> wms: New Order
+
+stockReservation <-> inventoryState: Reserve Stock
+& wms -> staff: New Orders
+
+stockReservation -> inventoryUpdate: Stock Reserved
+
+inventoryUpdate -> salesGateway: Stock Reserved
+& staff -> wms: Fulfills Orders
+
+salesGateway -> salesOnline: Stock levels updated
+& wms -> orderUpdate: Order Update
+& salesGateway -> salesAmazon: Stock levels updated
+& salesGateway -> salesEbay: Stock levels updated
+
+orderUpdate -> salesGateway: Order Update
+& orderUpdate -> stockAdjustment: Order Update
+salesGateway -> salesAmazon: Order Update
+& stockAdjustment -> inventoryState: Adjust Reserved Stock
+
+salesAmazon -> customer: Sends order status
+
+@enduml

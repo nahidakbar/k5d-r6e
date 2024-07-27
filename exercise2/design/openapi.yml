@@ -1,0 +1,529 @@
+openapi: 3.0.0
+info:
+  title: Order Management System API
+  version: 1.0.0
+  description: API design document for order management system.
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas: {}
+paths:
+  /api/v0/orders:
+    post:
+      operationId: createOrder
+      summary: Create a new order
+      tags:
+        - orders
+      description: Use this endpoint to create new orders.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                  format: uuid
+              required:
+                - customerId
+              additionalProperties: false
+        required: true
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    format: uuid
+                required:
+                  - orderId
+                additionalProperties: false
+                description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  issues: {}
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Bad Request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Internal Server Error
+    get:
+      operationId: searchOrders
+      summary: Search orders
+      tags:
+        - orders
+      description: Use this endpoint to search orders.
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+          in: query
+          name: customerId
+          required: false
+        - schema:
+            type: string
+            enum:
+              - pending
+              - shipped
+              - delivered
+              - cancelled
+          in: query
+          name: status
+          required: false
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: offset
+          required: false
+        - schema:
+            type: integer
+            minimum: 1
+            default: 10
+          in: query
+          name: limit
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        orderId:
+                          type: string
+                          format: uuid
+                        customerId:
+                          type: string
+                          format: uuid
+                        status:
+                          type: string
+                          enum:
+                            - pending
+                            - shipped
+                            - delivered
+                            - cancelled
+                        createdAt:
+                          type: string
+                          format: date-time
+                      required:
+                        - orderId
+                        - customerId
+                        - status
+                        - createdAt
+                      additionalProperties: false
+                  total:
+                    type: integer
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+                required:
+                  - data
+                  - total
+                  - offset
+                  - limit
+                additionalProperties: false
+                description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  issues: {}
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Bad Request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Internal Server Error
+  /api/v0/orders/{orderId}:
+    get:
+      operationId: getOrderById
+      summary: Get order by ID
+      tags:
+        - orders
+      description: Use this endpoint to get an order by its ID.
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+          in: path
+          name: orderId
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    format: uuid
+                  customerId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                      - pending
+                      - shipped
+                      - delivered
+                      - cancelled
+                  createdAt:
+                    type: string
+                    format: date-time
+                required:
+                  - orderId
+                  - customerId
+                  - status
+                  - createdAt
+                additionalProperties: false
+                description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  issues: {}
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Bad Request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Internal Server Error
+    put:
+      operationId: updateOrderById
+      summary: Update an order by id
+      tags:
+        - orders
+      description: Use this endpoint to update orders.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - cancelled
+              required:
+                - status
+              additionalProperties: false
+        required: true
+      parameters:
+        - schema:
+            type: string
+            format: uuid
+          in: path
+          name: orderId
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    format: uuid
+                  customerId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum:
+                      - pending
+                      - shipped
+                      - delivered
+                      - cancelled
+                  createdAt:
+                    type: string
+                    format: date-time
+                required:
+                  - orderId
+                  - customerId
+                  - status
+                  - createdAt
+                additionalProperties: false
+                description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                  issues: {}
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Bad Request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Not Found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  code:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - statusCode
+                  - code
+                additionalProperties: false
+                description: Internal Server Error
+security:
+  - basicAuth: []
