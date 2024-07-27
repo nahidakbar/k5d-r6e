@@ -86,39 +86,51 @@ export default async function createFastifyServer(options: {
   return server.withTypeProvider<ZodTypeProvider>();
 }
 
-export function runServer(server: FastifyServer, port: number) {
-  server.listen({ port, host: "0.0.0.0" }, (err, address) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+export function runServer(
+  server: FastifyServer,
+  port: number
+): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    server.listen({ port, host: "0.0.0.0" }, (err, address) => {
+      if (err) {
+        return reject(err);
+      }
 
-    console.log(`Server listening at ${address}`);
+      resolve(address);
+    });
   });
 }
 
 export const errorHandlerSchemas = {
-  400: z.object({
-    statusCode: z.number(),
-    code: z.string(),
-    message: z.string().optional(),
-    issues: z.any().optional(),
-  }).describe('Bad Request'),
-  401: z.object({
-    statusCode: z.number(),
-    code: z.string(),
-    message: z.string().optional(),
-  }).describe('Unauthorized'),
-  404: z.object({
-    statusCode: z.number(),
-    code: z.string(),
-    message: z.string().optional(),
-  }).describe('Not Found'),
-  500: z.object({
-    statusCode: z.number(),
-    code: z.string(),
-    message: z.string().optional(),
-  }).describe('Internal Server Error'),
+  400: z
+    .object({
+      statusCode: z.number(),
+      code: z.string(),
+      message: z.string().optional(),
+      issues: z.any().optional(),
+    })
+    .describe("Bad Request"),
+  401: z
+    .object({
+      statusCode: z.number(),
+      code: z.string(),
+      message: z.string().optional(),
+    })
+    .describe("Unauthorized"),
+  404: z
+    .object({
+      statusCode: z.number(),
+      code: z.string(),
+      message: z.string().optional(),
+    })
+    .describe("Not Found"),
+  500: z
+    .object({
+      statusCode: z.number(),
+      code: z.string(),
+      message: z.string().optional(),
+    })
+    .describe("Internal Server Error"),
 };
 
 export const UnauthorizedError = createError(

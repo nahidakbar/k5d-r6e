@@ -27,7 +27,7 @@ For task 2, I tried to take an approach where Task 1 requirements could be
 fulfilled from Task2 prototype.  This was achieved with the fastify web
 framework and fastify-swagger plugin.
 
-I've used zod for defining request and response types. Same types
+I've used zod for defining request and response types/schemas. Same types
 have been used for request/response validation and documentation generation.
 
 ### Running the project
@@ -48,14 +48,17 @@ To run with docker:
     docker run -p 8080:8080 order-management-harness .
 
 
-Once running, please go to http://localhost:8080/api-docs to access the swagger interface.
+Once running, please go to http://localhost:8080/api-docs to access the
+swagger interface.
 
 ### Configure the project
 
 By default, the project runs on port 8080 with basic authentication disabled.
-If you want to configure those, please copy the .env.sample file to .env and modify the values. Re-running the project after that will update setting.
+If you want to configure those, please copy the .env.sample file to .env and
+modify the values. Re-running the project after that will update setting.
 
-Can modify dummy data that comes with the project in the exercise2/src/orders/dummy-data.ts file.
+Can modify dummy data that comes with the project in the
+exercise2/src/domain/orders/dummy-data.ts file.
 
 Can also inject new orders by POSTing to the /api/v0/orders endpoint.
 

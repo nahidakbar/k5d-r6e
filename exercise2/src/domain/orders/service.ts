@@ -13,10 +13,10 @@ import {
   SearchOrderResults,
   UpdateOrderRequest,
 } from "./types";
-import { BadRequestError, NotFoundError } from "../lib/fastify";
+import { BadRequestError, NotFoundError } from "../../lib/fastify";
 
 export class DummyOrdersService {
-  orders: Order[] = DUMMY_ORDERS_DATA;
+  orders: Order[] = DUMMY_ORDERS_DATA.slice(0);
 
   async createOrder(
     options: CreateOrderRequest
@@ -43,17 +43,22 @@ export class DummyOrdersService {
     orderId: string,
     update: UpdateOrderRequest
   ): Promise<GetOrderResponse> {
-    const order = this.orders.find((order) => order.orderId === orderId);
-    if (!order) {
+    const orderIndex = this.orders.findIndex((order) => order.orderId === orderId);
+    
+    if (orderIndex === -1) {
       throw new NotFoundError();
     }
+    
+    const order = this.orders[orderIndex];
+    
+    const newOrder = { ...order };
 
     for (let key in update) {
       switch (key) {
         case "status": // change order status
           // can't cancel order unless it's pending
           if (order.status === "pending") {
-            order[key] = update[key];
+            newOrder[key] = update[key];
           }
           break;
         default:
@@ -61,7 +66,9 @@ export class DummyOrdersService {
       }
     }
 
-    return makeOrderResponse(order);
+    this.orders[orderIndex] = newOrder;
+
+    return makeOrderResponse(newOrder);
   }
 
   async searchOrders(search: SearchOrderRequest): Promise<SearchOrderResults> {
